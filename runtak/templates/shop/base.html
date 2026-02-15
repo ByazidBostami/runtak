@@ -1,0 +1,40 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>{% block title %}Runtak{% endblock %}</title>
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+</head>
+<body>
+
+<header class="header">
+    <div class="container header-flex">
+        <h1 class="logo">Runtak</h1>
+
+        <form method="get" action="/" class="search-box">
+            <input type="text" name="q" placeholder="Search products...">
+        </form>
+
+        <a href="/cart/" class="cart-btn">🛒 Cart</a>
+    </div>
+</header>
+
+<nav class="nav">
+    <a href="/">Home</a>
+    {% for cat in categories %}
+        <a href="/?category={{ cat.id }}">{{ cat.name }}</a>
+    {% endfor %}
+</nav>
+
+<main class="container">
+    {% block content %}{% endblock %}
+</main>
+
+<footer class="footer">
+    © {{ year }} Runtak — All Rights Reserved
+</footer>
+
+</body>
+</html>

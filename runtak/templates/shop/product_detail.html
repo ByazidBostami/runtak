@@ -1,0 +1,22 @@
+
+{% extends "shop/base.html" %}
+{% block title %}{{ product.name }}{% endblock %}
+{% load static %}
+{% block content %}
+<div class="product-detail">
+
+    <img src="{{ product.image }}" class="detail-image">
+
+    <div class="detail-info">
+        <h2>{{ product.name }}</h2>
+        <p class="price">৳ {{ product.price }}</p>
+
+        <p>{{ product.description|safe }}</p>
+
+        <a href="/cart/?product={{ product.id }}" class="btn btn-primary">
+            Order Now
+        </a>
+    </div>
+
+</div>
+{% endblock %}
