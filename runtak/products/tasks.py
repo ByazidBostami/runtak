@@ -18,7 +18,7 @@ def safe_json(response):
     """
     try:
         return response.json()
-    except Exception:
+    except ValueError:
         return {}
 
 
@@ -34,8 +34,9 @@ def sync_categories(self):
     url = "https://mohasagor.com.bd/api/reseller/category"
 
     response = requests.get(url, headers=HEADERS, timeout=60)
-    data = safe_json(response)
+    response.raise_for_status()
 
+    data = safe_json(response)
     categories = data.get("categories", [])
 
     for c in categories:
@@ -53,7 +54,7 @@ def sync_categories(self):
 
 
 # --------------------------------------------------
-# SYNC PRODUCTS (WITH FULL IMAGE SUPPORT)
+# SYNC PRODUCTS
 # --------------------------------------------------
 @shared_task(
     bind=True,
@@ -68,7 +69,7 @@ def sync_products(self):
         url = "https://mohasagor.com.bd/api/reseller/product"
         params = {
             "page": page,
-            "limit": 200,  # API safe max
+            "limit": 200,
         }
 
         response = requests.get(
@@ -88,17 +89,17 @@ def sync_products(self):
             break
 
         for item in products:
-            # ----------------------------------
-            # IMAGE LOGIC (IMPORTANT FIX)
-            # ----------------------------------
             image_url = ""
 
             # 1️⃣ product_image array (best quality)
             images = item.get("product_image", [])
             if images and images[0].get("product_image"):
-                image_url = BASE_IMAGE_URL + images[0]["product_image"].lstrip("/")
+                image_url = (
+                    BASE_IMAGE_URL
+                    + images[0]["product_image"].lstrip("/")
+                )
 
-            # 2️⃣ thumbnail_img fallback (MOST PRODUCTS USE THIS)
+            # 2️⃣ thumbnail fallback
             elif item.get("thumbnail_img"):
                 image_url = (
                     BASE_IMAGE_URL
@@ -106,9 +107,6 @@ def sync_products(self):
                     + item["thumbnail_img"].lstrip("/")
                 )
 
-            # ----------------------------------
-            # SAVE / UPDATE PRODUCT
-            # ----------------------------------
             Product.objects.update_or_create(
                 external_id=item["id"],
                 defaults={

@@ -1,5 +1,6 @@
 from django.db import models
 
+
 class Category(models.Model):
     external_id = models.IntegerField(unique=True)
     name = models.CharField(max_length=255)
@@ -16,9 +17,18 @@ class Product(models.Model):
     price = models.FloatField()
     sale_price = models.FloatField(default=0)
     stock = models.IntegerField(default=100)
-    image = models.URLField(blank=True)
 
-    category_id = models.IntegerField(default=0)
+    # 🔥 IMPORTANT CHANGE
+    image = models.ImageField(upload_to="products/", blank=True, null=True)
+
+    # 🔥 Proper relational mapping
+    category = models.ForeignKey(
+        Category,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="products"
+    )
 
     def __str__(self):
         return self.name
